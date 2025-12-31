@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Quiet Moment</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --calmness: 1; /* 0 to 1, where 1 is active, 0 is very still */
+      --depth: 0;    /* 0 to 1, increases through pages */
+      --blush-base: #FFF1F4;
+      --blush-alt: #FFE4EA;
+      --rose-mist: rgba(224, 122, 140, 0.18);
+    }
+
+    /* Layer 1: Base */
+    body {
+      background-color: var(--blush-base);
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      transition: background-color 1.5s ease-in-out;
+    }
+
+    /* Layer 2: Breathing Gradient */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, var(--blush-alt) 0%, transparent 70%);
+      opacity: calc(0.4 * var(--calmness));
+      z-index: -2;
+      animation: breathe-slow 12s ease-in-out infinite;
+      transition: opacity 2s ease-in-out;
+    }
+
+    /* Layer 3: Emotional Light Wash / Vignette */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 30%, rgba(224, 122, 140, calc(0.08 + (0.05 * var(--depth)))) 100%);
+      pointer-events: none;
+      z-index: -1;
+      transition: opacity 2s ease-in-out;
+      opacity: var(--calmness);
+    }
+
+    @keyframes breathe-slow {
+      0%, 100% { transform: scale(1); opacity: calc(0.3 * var(--calmness)); }
+      50% { transform: scale(1.15); opacity: calc(0.5 * var(--calmness)); }
+    }
+
+    @keyframes soft-pulse {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.05); filter: brightness(1.05); }
+    }
+
+    .animate-soft-pulse {
+      animation: soft-pulse 3s ease-in-out infinite;
+    }
+
+    .cursor-glow {
+      pointer-events: none;
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, var(--rose-mist) 0%, rgba(224, 122, 140, 0) 70%);
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    /* Typography UX */
+    .ink-primary { color: #3B2C2F; transition: color 1s ease; }
+    .ink-secondary { color: #5A3E42; transition: color 1s ease; }
+    .ink-whisper { color: rgba(59, 44, 47, 0.65); transition: color 1s ease; }
+
+    button:active {
+      transform: scale(0.96);
+      background-color: rgba(224, 122, 140, 0.18); /* Bloom effect */
+    }
+
+    /* Smooth settle transitions */
+    .page-settle {
+      transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 1s ease;
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3"
+  }
+}
+</script>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
