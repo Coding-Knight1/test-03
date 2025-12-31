@@ -7,25 +7,49 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
-      --calmness: 1; /* 0 to 1, where 1 is active, 0 is very still */
-      --depth: 0;    /* 0 to 1, increases through pages */
+      --calmness: 1; 
+      --depth: 0;   
       --blush-base: #FFF1F4;
       --blush-alt: #FFE4EA;
       --rose-mist: rgba(224, 122, 140, 0.18);
+      --accent: #E07A8C;
+      --hover: #F4A6B8;
+      --text: #3B2C2F;
     }
 
-    /* Layer 1: Base */
+    /* Ensure the background color is present everywhere to prevent "black" gaps */
+    html {
+      background-color: var(--blush-base);
+      height: 100%;
+    }
+
     body {
       background-color: var(--blush-base);
-      overflow: hidden;
       margin: 0;
       padding: 0;
       user-select: none;
       font-family: 'Georgia', 'Times New Roman', serif;
-      transition: background-color 1.5s ease-in-out;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      scroll-behavior: smooth;
     }
 
-    /* Layer 2: Breathing Gradient */
+    /* Transition to scrollable when on letter page */
+    body.scrollable {
+      overflow-y: auto;
+      display: block; 
+    }
+
+    /* Hide scrollbar but allow functionality */
+    body::-webkit-scrollbar {
+      width: 0px;
+      background: transparent;
+    }
+
+    /* Fixed Background Layers */
     body::before {
       content: '';
       position: fixed;
@@ -35,9 +59,9 @@
       z-index: -2;
       animation: breathe-slow 12s ease-in-out infinite;
       transition: opacity 2s ease-in-out;
+      pointer-events: none;
     }
 
-    /* Layer 3: Emotional Light Wash / Vignette */
     body::after {
       content: '';
       position: fixed;
@@ -55,8 +79,8 @@
     }
 
     @keyframes soft-pulse {
-      0%, 100% { transform: scale(1); filter: brightness(1); }
-      50% { transform: scale(1.05); filter: brightness(1.05); }
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
     }
 
     .animate-soft-pulse {
@@ -72,34 +96,369 @@
       transform: translate(-50%, -50%);
       z-index: 0;
       transition: opacity 1s ease-in-out;
+      display: block;
     }
 
-    /* Typography UX */
-    .ink-primary { color: #3B2C2F; transition: color 1s ease; }
-    .ink-secondary { color: #5A3E42; transition: color 1s ease; }
-    .ink-whisper { color: rgba(59, 44, 47, 0.65); transition: color 1s ease; }
+    #app {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem;
+      text-align: center;
+      transition: all 1s ease;
+    }
 
-    button:active {
+    .ink-primary { color: var(--text); }
+    .ink-secondary { color: #5A3E42; }
+    .ink-whisper { color: rgba(59, 44, 47, 0.65); }
+
+    .romantic-btn {
+      margin-top: 3.5rem;
+      padding: 0.875rem 2.5rem;
+      border-radius: 9999px;
+      background-color: var(--accent);
+      color: #FFF1F4;
+      font-size: 1.125rem;
+      font-weight: 300;
+      letter-spacing: 0.025em;
+      transition: all 0.8s ease;
+      opacity: 0;
+      transform: translateY(1.5rem);
+      box-shadow: 0 4px 12px rgba(224, 122, 140, 0.22);
+    }
+
+    .romantic-btn.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .romantic-btn:hover {
+      background-color: var(--hover);
+      transform: scale(1.02);
+    }
+
+    .romantic-btn:active {
       transform: scale(0.96);
-      background-color: rgba(224, 122, 140, 0.18); /* Bloom effect */
+      background-color: rgba(224, 122, 140, 0.18);
     }
 
-    /* Smooth settle transitions */
-    .page-settle {
-      transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 1s ease;
+    .fade-in {
+      animation: fadeIn 1.2s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      background: rgba(224, 122, 140, 0.15);
+      border-radius: 4px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      margin-top: -8px;
+      box-shadow: 0 2px 6px rgba(224, 122, 140, 0.3);
+    }
+
+    .letter-container {
+      max-width: 480px;
+      margin: 0 auto;
+      text-align: left;
+      line-height: 2.2;
+      padding-bottom: 12rem;
+    }
+
+    #typewriter-body p {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      word-spacing: 0.05em;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      transform: translateY(5px);
+      transition: opacity 1s, transform 1s;
+    }
+
+    #typewriter-body p.typing {
+      opacity: 1;
+      transform: translateY(0);
     }
   </style>
-<script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3"
-  }
-}
-</script>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="glow" class="cursor-glow"></div>
+  <main id="app"></main>
+
+  <script>
+    const app = document.getElementById('app');
+    const glow = document.getElementById('glow');
+    let pageIndex = 0;
+    let idleTimer;
+
+    const triggerHaptic = (ms = 10) => {
+      if (navigator.vibrate) navigator.vibrate(ms);
+    };
+
+    const updateVisuals = (index) => {
+      const root = document.documentElement;
+      const totalPages = 7; 
+      const depth = index / totalPages;
+      root.style.setProperty('--depth', depth);
+      
+      if (index === 7) {
+        root.style.setProperty('--calmness', '0');
+        if (glow) glow.style.opacity = '0';
+        document.body.classList.add('scrollable');
+      } else {
+        document.body.classList.remove('scrollable');
+      }
+    };
+
+    const handleInteraction = (e) => {
+      if (glow && pageIndex !== 7) {
+        glow.style.left = e.clientX + 'px';
+        glow.style.top = e.clientY + 'px';
+        glow.style.opacity = '1';
+      }
+      
+      if (pageIndex !== 7) {
+        document.documentElement.style.setProperty('--calmness', '1');
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+          document.documentElement.style.setProperty('--calmness', '0.3');
+        }, 4000);
+      }
+    };
+    window.addEventListener('mousemove', handleInteraction);
+
+    const renderPage = (index) => {
+      pageIndex = index;
+      app.innerHTML = '';
+      app.className = 'fade-in';
+      updateVisuals(index);
+
+      switch(index) {
+        case 0: renderLanding(); break;
+        case 1: renderConsent(); break;
+        case 2: renderHeart(); break;
+        case 3: renderGratitude(); break;
+        case 4: renderDrag(); break;
+        case 5: renderConfession(); break;
+        case 6: renderAssurance(); break;
+        case 7: renderLetter(); break;
+      }
+    };
+
+    const createBtn = (label, onClick, delay = 1000) => {
+      const btn = document.createElement('button');
+      btn.className = 'romantic-btn';
+      btn.innerText = label;
+      btn.onclick = () => { triggerHaptic(15); onClick(); };
+      setTimeout(() => btn.classList.add('visible'), delay);
+      return btn;
+    };
+
+    // --- PAGE RENDERERS ---
+
+    const renderLanding = () => {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <h1 class="text-5xl ink-primary font-light mb-8">Hi, Sannidhi.</h1>
+        <p id="line1" class="text-2xl ink-secondary font-light opacity-0 transition-opacity duration-1000">I made something for you.</p>
+        <p id="line2" class="text-lg ink-whisper font-light opacity-0 transition-opacity duration-1000 mt-8">We can take this slow.</p>
+      `;
+      app.appendChild(wrapper);
+      setTimeout(() => { if (wrapper.querySelector('#line1')) wrapper.querySelector('#line1').style.opacity = '1'; }, 1800);
+      setTimeout(() => { if (wrapper.querySelector('#line2')) wrapper.querySelector('#line2').style.opacity = '1'; }, 3600);
+      app.appendChild(createBtn('I’m ready.', () => renderPage(1), 4600));
+    };
+
+    const renderConsent = () => {
+      app.innerHTML = `<p class="text-2xl ink-secondary font-light leading-relaxed">This is just something I wanted you to have.</p>`;
+      app.appendChild(createBtn('Okay.', () => renderPage(2), 1200));
+    };
+
+    const renderHeart = () => {
+      let taps = 0;
+      app.innerHTML = `
+        <p class="text-2xl ink-primary font-light mb-2">Before I say more, take a moment.</p>
+        <p class="text-sm ink-whisper mb-14">Tap the heart when you're ready to feel loved.</p>
+        <div id="heart-btn" class="cursor-pointer transition-transform duration-500 animate-soft-pulse mx-auto w-fit">
+          <svg width="90" height="90" viewBox="0 0 24 24" fill="#E07A8C" class="drop-shadow-sm transition-colors duration-700">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+          </svg>
+        </div>
+        <p id="heart-reveal" class="mt-14 text-xl ink-secondary italic opacity-0 transition-opacity duration-1000">You always make space for me like this.</p>
+      `;
+      const hBtn = document.getElementById('heart-btn');
+      const hRev = document.getElementById('heart-reveal');
+      hBtn.onclick = () => {
+        taps++;
+        triggerHaptic(10 + taps * 2);
+        hBtn.style.transform = `scale(${1 + taps * 0.05})`;
+        if (taps === 6) {
+          hRev.style.opacity = '1';
+          setTimeout(() => renderPage(3), 3500);
+        }
+      };
+    };
+
+    const renderGratitude = () => {
+      const lines = [
+        "There's a quiet way you move through everyday life that changes the people around you.",
+        "You don't rush, you don't push — you just make things feel calmer, clearer, more possible.",
+        "Being close to you has made me more confident in my own life, without you ever trying to teach me how."
+      ];
+      const wrapper = document.createElement('div');
+      wrapper.className = "space-y-10 text-xl ink-secondary font-light leading-relaxed";
+      app.appendChild(wrapper);
+      
+      lines.forEach((line, i) => {
+        const p = document.createElement('p');
+        p.innerText = line;
+        p.className = "opacity-0 transition-opacity duration-1500";
+        wrapper.appendChild(p);
+        setTimeout(() => p.style.opacity = '1', i * 3200);
+      });
+      
+      app.appendChild(createBtn('Next.', () => renderPage(4), 9600));
+    };
+
+    const renderDrag = () => {
+      const sentence = "Loving you has quietly taught me how to trust myself.";
+      const words = sentence.split(" ");
+      app.innerHTML = `
+        <p class="text-2xl ink-primary font-light mb-2">Take this slow.</p>
+        <p class="text-sm ink-whisper mb-14">Drag when you're ready.</p>
+        <div id="words-container" class="min-h-[120px] flex flex-wrap justify-center gap-x-3 gap-y-2 mb-14">
+          ${words.map(w => `<span class="text-2xl opacity-0 blur-md translate-y-3 transition-all duration-1000 ink-primary">${w}</span>`).join('')}
+        </div>
+        <input type="range" id="reveal-slider" min="0" max="100" value="0">
+      `;
+      const slider = document.getElementById('reveal-slider');
+      const spans = document.getElementById('words-container').querySelectorAll('span');
+      let lastVal = 0;
+      slider.oninput = (e) => {
+        const val = e.target.value;
+        if (Math.abs(val - lastVal) > 8) triggerHaptic(4);
+        lastVal = val;
+        const count = Math.floor((val / 100) * words.length);
+        spans.forEach((s, i) => {
+          if (i <= count) {
+            s.style.opacity = '1';
+            s.style.filter = 'blur(0)';
+            s.style.transform = 'translateY(0)';
+          }
+        });
+        if (val >= 100) {
+          triggerHaptic(20);
+          setTimeout(() => renderPage(5), 2200);
+        }
+      };
+    };
+
+    const renderConfession = () => {
+      const container = document.createElement('div');
+      container.className = "space-y-14";
+      container.innerHTML = `
+        <h2 id="c1" class="text-5xl ink-primary font-light opacity-0 transition-opacity duration-[2500ms]">Sannidhi, I love you ❤️</h2>
+        <p id="c2" class="text-xl ink-primary font-light opacity-0 transition-opacity duration-[2500ms] leading-relaxed">Not just for how you make me feel, but for how you've become part of how I live.</p>
+        <p id="c3" class="text-xl ink-primary font-light opacity-0 transition-opacity duration-[2500ms] leading-relaxed">I choose you — with gratitude, with certainty, and with all the calm you've brought into my life.</p>
+      `;
+      app.appendChild(container);
+      setTimeout(() => { if (document.getElementById('c1')) document.getElementById('c1').style.opacity = '1'; }, 500);
+      setTimeout(() => { if (document.getElementById('c2')) document.getElementById('c2').style.opacity = '1'; }, 3300);
+      setTimeout(() => { if (document.getElementById('c3')) document.getElementById('c3').style.opacity = '1'; }, 6100);
+      setTimeout(() => renderPage(6), 12000);
+    };
+
+    const renderAssurance = () => {
+      app.innerHTML = `
+        <div class="space-y-10 text-xl ink-secondary font-light leading-relaxed">
+          <p>Nothing about this changes the quiet parts of us.</p>
+          <p>I'm still here — in the ordinary days, the unsure moments, and everything in between.</p>
+          <p>You don't have to hold anything differently. I just wanted you to know.</p>
+        </div>
+      `;
+      app.appendChild(createBtn('Stay.', () => renderPage(7), 1200));
+    };
+
+    const renderLetter = () => {
+      const letterData = [
+        "My dear Sannidhi Putta,❤️,",
+        "I may never be able to tell you this, but I feel like I've already married you. ❤️🧎🏻",
+        "Not in a temple, 🛕 not in front of people, but deep inside my heart.🌸❤️",
+        "I married your soul the day you understood my feelings. 🪷❤️",
+        "I married your smile when it healed my chaos. 😌🌝",
+        "I married your presence when it became my peace. ☮️",
+        "Because love isn't about rituals or rings. 💍 🔥",
+        "It's about choosing each other every single day, 🌝through every fight, 🫠every tear, 🥹every distance. 🫠",
+        "When two souls stay loyal, when they never give up on each other. 🥹😌🔥❤️🌸🪷",
+        "That's marriage. 🌸🪷🤩🥹❤️🌝",
+        "Pure. Real. Eternal. 🔥🔥🧿🧿🌸🪷",
+        "Like the one you've already married by heart.💓❤️🌸🧿",
+        "I will choose you, even when life gets harder !",
+        "I promise to hold you when days feel heavy, and laugh with you when they feel right!",
+        "I’ll celebrate your wins ! And stay even when things get messy!",
+        "I don’t promise perfection! Just honesty, efforts and live that keeps choosing YOU ❤️! Every single day ..❤️",
+        "I love you soo much Sannidhi ❤️"
+      ];
+
+      app.innerHTML = `
+        <div class="letter-container">
+          <p class="text-sm italic ink-whisper mb-16 text-center">This is the part I would've written by hand.</p>
+          <div id="typewriter-body" class="text-lg ink-primary font-light"></div>
+        </div>
+      `;
+      const body = document.getElementById('typewriter-body');
+
+      const autoScroll = () => {
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: 'smooth'
+        });
+      };
+
+      const typeParagraph = async (text, speed = 40, isHeader = false) => {
+        const p = document.createElement('p');
+        if (isHeader) p.className = "text-2xl font-normal italic mb-4";
+        body.appendChild(p);
+        
+        setTimeout(() => p.classList.add('typing'), 10);
+
+        for (let char of text) {
+          p.textContent += char;
+          autoScroll();
+          await new Promise(r => setTimeout(r, speed));
+        }
+        await new Promise(r => setTimeout(r, 800));
+      };
+
+      const startLetter = async () => {
+        for (let i = 0; i < letterData.length; i++) {
+          await typeParagraph(letterData[i], 45, i === 0);
+        }
+      };
+      
+      startLetter();
+    };
+
+    renderPage(0);
+
+  </script>
 </body>
 </html>
